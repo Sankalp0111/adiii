@@ -8,18 +8,23 @@ dotenv.config();
 
 const { Pool } = pg;
 const app = express();
+
 const PORT = Number(process.env.PORT) || 5000;
 const FRONTEND_URL = process.env.FRONTEND_URL || 'http://localhost:5173';
-const DEFAULT_DATABASE_URL = 'postgresql://gh_user:gh_pass@localhost:5433/guesthouse';
+
+const DEFAULT_DATABASE_URL =
+  'postgresql://gh_user:gh_pass@localhost:5433/guesthouse';
+
 const databaseUrl = process.env.DATABASE_URL || DEFAULT_DATABASE_URL;
-const isLocalDatabase = !databaseUrl.includes('localhost') && !databaseUrl.includes('127.0.0.1') ? false : true;
+
+const isLocalDatabase =
+  databaseUrl.includes('localhost') ||
+  databaseUrl.includes('127.0.0.1');
 
 const pool = new Pool({
   connectionString: databaseUrl,
   ssl: isLocalDatabase ? false : { rejectUnauthorized: false },
 });
-
-const allowedOrigins = new Set(['http://localhost:5173', 'http://127.0.0.1:5173']);
 
 const ensureDatabaseSchema = async () => {
   await pool.query(`
@@ -42,8 +47,15 @@ const ensureDatabaseSchema = async () => {
     );
   `);
 
-  const seedEmail = process.env.SEED_EMAIL || 'aditiullas123@gmail.com';
-  const seedPassword = process.env.SEED_PASSWORD || 'SankalpAditi@290103';
+  const seedEmail = process.env.SEED_EMAIL;
+  const seedPassword = process.env.SEED_PASSWORD;
+
+  if (!seedEmail || !seedPassword) {
+    throw new Error(
+      'SEED_EMAIL and SEED_PASSWORD must be configured.'
+    );
+  }
+
   const passwordHash = await bcrypt.hash(seedPassword, 10);
 
   await pool.query(
@@ -53,14 +65,43 @@ const ensureDatabaseSchema = async () => {
        password_hash = EXCLUDED.password_hash,
        full_name = EXCLUDED.full_name,
        birthday_message = EXCLUDED.birthday_message`,
-    [seedEmail, passwordHash, 'Aditi', 'Happy Birthday, my love. You make every day brighter. I love you more than words can say.']
+    [
+      seedEmail.trim().toLowerCase(),
+      passwordHash,
+      'Aditi',
+      'Happy Birthday, my love. You make every day brighter. I love you more than words can say.',
+    ]
   );
 
   const gifts = [
-    { name: 'Love letter', description: 'A heartfelt note filled with love, gratitude, and future dreams.', emoji: '💌', tag: 'letter' },
-    { name: 'Candlelight dinner', description: 'A romantic evening with good food, warm lights, and your favorite smile.', emoji: '🥂', tag: 'romance' },
-    { name: 'Dream trip', description: 'A getaway where we make memories and chase adventures together.', emoji: '✈️', tag: 'travel' },
-    { name: 'Jewellery treasure', description: 'Something beautiful to keep close and remind you how precious you are.', emoji: '💍', tag: 'gift' },
+    {
+      name: 'Love letter',
+      description:
+        'A heartfelt note filled with love, gratitude, and future dreams.',
+      emoji: '💌',
+      tag: 'letter',
+    },
+    {
+      name: 'Candlelight dinner',
+      description:
+        'A romantic evening with good food, warm lights, and your favorite smile.',
+      emoji: '🥂',
+      tag: 'romance',
+    },
+    {
+      name: 'Dream trip',
+      description:
+        'A getaway where we make memories and chase adventures together.',
+      emoji: '✈️',
+      tag: 'travel',
+    },
+    {
+      name: 'Jewellery treasure',
+      description:
+        'Something beautiful to keep close and remind you how precious you are.',
+      emoji: '💍',
+      tag: 'gift',
+    },
   ];
 
   for (const gift of gifts) {
@@ -78,7 +119,11 @@ const ensureDatabaseSchema = async () => {
 
 await ensureDatabaseSchema();
 
-app.use(cors({ origin: FRONTEND_URL, credentials: true }));
+app.use(cors({
+  origin: FRONTEND_URL,
+  credentials: true,
+}));
+
 app.use(express.json());
 
 app.get('/api/health', async (_req, res) => {
@@ -158,6 +203,10 @@ app.get('/api/gifts', async (_req, res) => {
   }
 });
 
-app.listen(PORT, () => {
-  console.log(`Backend running on http://localhost:${PORT}`);
-});
+export default app;
+
+if (process.env.NODE_ENV !== 'production') {
+  app.listen(PORT, () => {
+    console.log(`Backend running on http://localhost:${PORT}`);
+  });
+}
