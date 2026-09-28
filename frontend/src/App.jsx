@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useState } from 'react';
 
 const defaultForm = { email: '', password: '' };
+const API_URL = import.meta.env.VITE_API_URL;
 
 const mazeLayout = [
   '###################',
@@ -67,7 +68,9 @@ function App() {
   useEffect(() => {
     const fetchProfile = async () => {
       try {
-        const response = await fetch('/api/profile?email=' + encodeURIComponent(email));
+        const response = await fetch(
+          `${API_URL}/api/profile?email=${encodeURIComponent(email)}`
+        );
         const data = await response.json();
         if (data.ok) setProfile(data.user);
       } catch (_err) {
@@ -81,7 +84,7 @@ function App() {
   useEffect(() => {
     const fetchGifts = async () => {
       try {
-        const response = await fetch('/api/gifts');
+        const response = await fetch(`${API_URL}/api/gifts`);
         const data = await response.json();
         if (data.ok) setGifts(data.gifts);
       } catch (_err) {
@@ -132,7 +135,7 @@ function App() {
     setError('');
 
     try {
-      const response = await fetch('/api/login', {
+      const response = await fetch(`${API_URL}/api/login`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ email, password }),
