@@ -8,13 +8,15 @@ dotenv.config();
 
 const { Pool } = pg;
 const app = express();
-const PORT = process.env.PORT || 5000;
+const PORT = Number(process.env.PORT) || 5000;
 const FRONTEND_URL = process.env.FRONTEND_URL || 'http://localhost:5173';
 const DEFAULT_DATABASE_URL = 'postgresql://gh_user:gh_pass@localhost:5433/guesthouse';
+const databaseUrl = process.env.DATABASE_URL || DEFAULT_DATABASE_URL;
+const isLocalDatabase = !databaseUrl.includes('localhost') && !databaseUrl.includes('127.0.0.1') ? false : true;
 
 const pool = new Pool({
-  connectionString: process.env.DATABASE_URL || DEFAULT_DATABASE_URL,
-  ssl: process.env.DATABASE_URL ? { rejectUnauthorized: false } : false,
+  connectionString: databaseUrl,
+  ssl: isLocalDatabase ? false : { rejectUnauthorized: false },
 });
 
 const allowedOrigins = new Set(['http://localhost:5173', 'http://127.0.0.1:5173']);
