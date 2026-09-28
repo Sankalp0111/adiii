@@ -42,8 +42,9 @@ const ensureDatabaseSchema = async () => {
     );
   `);
 
-  const email = 'aditiullas123@gmail.com';
-  const passwordHash = await bcrypt.hash('SankalpAditi@290103', 10);
+  const seedEmail = process.env.SEED_EMAIL || 'aditiullas123@gmail.com';
+  const seedPassword = process.env.SEED_PASSWORD || 'SankalpAditi@290103';
+  const passwordHash = await bcrypt.hash(seedPassword, 10);
 
   await pool.query(
     `INSERT INTO users (email, password_hash, full_name, birthday_message)
@@ -52,7 +53,7 @@ const ensureDatabaseSchema = async () => {
        password_hash = EXCLUDED.password_hash,
        full_name = EXCLUDED.full_name,
        birthday_message = EXCLUDED.birthday_message`,
-    [email, passwordHash, 'Aditi', 'Happy Birthday, my love. You make every day brighter. I love you more than words can say.']
+    [seedEmail, passwordHash, 'Aditi', 'Happy Birthday, my love. You make every day brighter. I love you more than words can say.']
   );
 
   const gifts = [
