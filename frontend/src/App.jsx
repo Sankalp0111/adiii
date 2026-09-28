@@ -1,11 +1,6 @@
 import { useEffect, useMemo, useState } from 'react';
 
-const seededCredentials = {
-  email: 'aditiullas123@gmail.com',
-  password: 'SankalpAditi@290103',
-};
-
-const defaultForm = { email: seededCredentials.email, password: seededCredentials.password };
+const defaultForm = { email: '', password: '' };
 
 const mazeLayout = [
   '###################',
@@ -466,14 +461,28 @@ function App() {
             <>
               <p className="eyebrow">Private birthday access</p>
               <h1>Welcome, love</h1>
-              <form onSubmit={handleLogin}>
+              <form onSubmit={handleLogin} autoComplete="off">
                 <label>
                   Email
-                  <input type="email" value={email} onChange={(e) => setEmail(e.target.value)} required />
+                  <input
+                    type="email"
+                    name="email"
+                    value={email}
+                    onChange={(e) => setEmail(e.target.value)}
+                    autoComplete="off"
+                    required
+                  />
                 </label>
                 <label>
                   Password
-                  <input type="password" value={password} onChange={(e) => setPassword(e.target.value)} required />
+                  <input
+                    type="password"
+                    name="password"
+                    value={password}
+                    onChange={(e) => setPassword(e.target.value)}
+                    autoComplete="new-password"
+                    required
+                  />
                 </label>
                 {error && <div className="error-box">{error}</div>}
                 <button type="submit" disabled={isLoggingIn}>{isLoggingIn ? 'Checking...' : 'Enter surprise'}</button>
